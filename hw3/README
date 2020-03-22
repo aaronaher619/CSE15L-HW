@@ -1,0 +1,49 @@
+1. break 42
+2. argc=1
+3. It represents the address of where in memory it is
+4. nums[2] = 6 because it was initialized to that number
+5. The value of nums[2] stayed the same because line 146 executed
+6. It is currently executing doMath
+7. The value returned was 30
+8. It stands for Uninitialized Memory Read and the line that caused this error was 152. Accessing the value (nums[0])at address 0x3803043A5B which has a size of 8.
+9. 2 bytes were leaked from the function main.
+
+line 151 - nums[0] = 4;
+line 166 -  DataHolder_delete(&myHolder)
+
+10. Run make valgrind again and then it will report that no memory leaks happened.
+11. We are in the DataHolder function and the names and values of the parameters are this with the value of an object and str which its value is a string("Hello World")
+12. 0x7fffffffd720 is the address of myHolder.
+
+line 121 - cout << myHolder;
+
+13. It is executing the main function currently.
+14. So far the program goes until line 32 which is the break point and prints int num1 = 5;.
+15. num1 = 5, num2 = null. It tells you the line thats going to be executed once step in called again.
+16. The difference is that step continues running the program until control reaches a different source line. Next continues to the next source line in the current stack frame.
+17. It is in the method DataHolder
+18. /home/linux/ieng6/cs15x/cs15xajl
+19. I would use the pwd command.
+20. lines 2a3
+21. diff telnos telnos4
+22. Nothing is printed since they are copies of each other.
+23. When nothing gets printed is when they are the same.
+24. it contains the lines in alphabetical order.
+25. The result is that it prints all the uniq lines and gets rid of duplicates
+26. uniq -d <filename>
+27. What is changed is that it ignores the m case and prints the C case.
+28. 
+Hale Elizabeth Bot   744-6892
+Harris Thomas  Stat  744-7623
+Smith John     Comsc 744-4444 
+Davis Paulette Phys  744-9579
+Holland Tod    A&S   744-8368
+
+1
+
+5
+
+Cross Joseph   MS    744-0320
+
+29. cut -c5-21 employee^C
+

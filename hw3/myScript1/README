@@ -1,0 +1,11 @@
+1. break foo
+2. stop at hw0:74
+3. It means that you need to delete the fourth line from "FileA"
+4a. line 6
+4b. line 1
+5. a will still be 8 because the line a = b has not executed yet.
+6a. absolute pathname
+6b. absolute pathname
+6c. relative pathname
+7a. cd
+7b. pwd

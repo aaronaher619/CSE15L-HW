@@ -1,0 +1,21 @@
+#!/bin/bash
+# POSITIONAL PARAMETER HOMEWORK
+# due 4/24/17 @ 11:59PM
+# name:
+# PID:
+#
+# usage example: ./script firstargument secondargument
+#
+# for this assignment, please replace the "_TODO_" with the
+# appropriate answers. Please note that each of the answers
+# will start with the $ that is already provided.
+
+
+echo $_TODO_         # print the name of the script
+echo $_TODO_         # print the first argument
+echo $_TODO_         # print the second argument
+echo $_TODO_         # print the shell pid
+echo $_TODO_         # print the exit code
+echo $_TODO_         # print the number of arguments
+echo $_TODO_         # print the login name
+echo $_TODO_         # print all the arguments

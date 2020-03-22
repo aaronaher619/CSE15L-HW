@@ -1,0 +1,349 @@
+#!/usr/bin/env bash
+#
+# CSE 15L Scripting Project
+#
+# Author:  Aaron Hernandez
+# PID:     A12623880
+# Login:   cs15xajl
+# Due:     June 2 2017 @ 11:59pm
+#
+#-------------------------------------------------------------------[ MAN PAGE ]
+#
+# NAME
+#        hide - make files hidden within the original directory.
+#
+# SYNOPSIS
+#        hide [OPTIONS] PATH [PATH...]
+#
+# DESCRIPTION
+#        hide  is a command-line script which hides list of files with their own
+#        original directories.  It utilizes the command-line tool zip to provide
+#        password protected encryption  on  files  you don't wish to be exposed,
+#        and hide the encrypted files from sight by putting them inside a hidden
+#        designated directory.
+#
+# OPTIONS
+#        -p   Prompt the user once for password to encrypt all files user passed
+#             in to be hidden. This option is ignored when -u option is present.
+#
+#        -u dir
+#             When the -u option is present,  hide  expects exactly one argument
+#             as the directory that contains the hidden directory for all zipped
+#             files, and  unzip  the original files out of the hidden directory.
+#             Password may be prompted for  every  single  file  if the file was
+#             encrypted with a password.
+#
+#-------------------------------------------------------------------------------
+
+
+# XXX DO NOT MODIFY THE SECTION BELOW XXX--------------------[ STRING LITERALS ]
+#
+# This section defines the string literals to display for user interaction.
+#     - Use these exclusively to avoid typos and other errors.
+#     - To print the trailing whitespace, use double quotes around the variable.
+
+# usage message
+USAGE_MSG="Usage: $0 [OPTIONS] PATH [PATH...]"
+
+# error messages
+FILE_ERR='Failed to hide invalid file: '
+NO_SECRET_ERR='No "secret" found at: '
+
+# prompts
+PASSWD_PROMPT='Enter Password: '
+
+# the secret directory
+SECRET_DIR='.secret'
+
+# XXX DO NOT MODIFY THE SECTION ABOVE XXX --------------------------------------
+
+
+# YOUR CODE EXPECTED FOR THIS SECTION ------------------[ PART ONE: PARSE ARGS ]
+#
+# This part of the script parses option flags and other command-line arguments.
+#
+# Parsing the command-line arguments may be fairly complex for the script, since
+# the number of argument is unknown, and some of them might be optional. That is
+# why we recommend using the  getopts  command instead of writing complicated if
+# statements.
+#
+# An example of  getopts  would look like this:
+#
+#     while getopts ":a:b:c" opt $@; do
+#         echo -n "$OPTIND "
+#         case $opt in
+#             a) echo "-a flag is set with argument: " $OPTARG;;
+#             b) echo "-b flag is set with argument: " $OPTARG;;
+#             c) echo "-c flag is set with no argument.";;
+#            \?) echo "You passed in an invalid flag:" $OPTARG;;
+#             :) echo "Argument required for this flag: " $OPTARG;;
+#         esac
+#     done
+#
+# Copy these lines of code to an empty file and try running it using  bash  with
+# different combinations of options and command-line arguments, and try answring
+# the following questions:
+#
+#     1.  Can you circle out the while-loop structure?
+#     2.  What is the first argument passed to  getopts ?
+#     3.  What does each colon mean inside the first argument?
+#     4.  Why do we need the second argument (opt)?
+#     5.  What does the  $@  mean?
+#     6.  Can you circle out the switch-case structure, and the switch variable?
+#     7.  What does each case stand for?
+#     8.  What is each case doing?
+#
+# (More on getopts: http://wiki.bash-hackers.org/howto/getopts_tutorial)
+#
+# Here is a general outline for what you may need to do.  Feel free to make your
+# own design decisions, as long as the script behaves the same.
+#
+#     - Use the  u_flag and p_flag  variables to make a record of whether the -u
+#       flag and the -p flags are passed to the script.
+#
+#     - If the -u flag is on, use the  u_path  variable to remember the argument
+#       passed to the  -u  flag, which corresponds to the directory whose secret
+#       the script is about to reveal.  All other command-line arguments will be
+#       ignored.
+#
+#     - If there is an error in the usage of the script, print the usage message
+#       before exiting with exit code 2 (misuse).
+
+# variables for parsing arguments
+u_flag=0
+p_flag=0
+u_path=0
+
+while getopts ":u:p:" opt $@; do                                                 
+    case $opt in                                                       
+        u)
+            u_flag=1
+	    p_flag=0
+	    shift
+	    break
+	    ;;
+        p)
+	    p_flag=1
+	    u_flag=0
+	    shift
+	    ;;                   
+        \?)
+	    echo $USAGE_MSG
+	    exit 2
+	    ;;             
+        :)
+	    echo $USAGE_MSG
+	    exit 2
+	    ;;          
+    esac                                                               
+done
+
+# YOUR CODE EXPECTED FOR THE SECTION ABOVE ------------------[ END OF PART ONE ]
+
+
+# YOUR CODE EXPECTED FOR THIS SECTION --------------[ PART TWO: HIDING SECRETS ]
+#
+# This part of the script handles the hiding of the files.  The script only runs
+# this section when the -u flag is absent.
+#
+# Here is the general workflow for this part of the script:
+#
+#     - The script expects to at least do something.  Therefore, if there are no
+#       command-line arguments present after the option flags when the -u option
+#       is not set, print the usage message and exit with status 2.
+#
+#     - If the -p flag is set, prompt the user for a password, and store that in
+#       the  passwd  variable.  Use  PASSWD_PROMPT  to display the prompt.
+#
+#     - Iterate through all arguments from the command-line.
+#
+#     - For each argument, check whether it is a valid file (either regular file
+#       or directory, etc).  Print FILE_ERR from the string literals to indicate
+#       a certain file being invalid, then continue with the next file.
+#
+#       The error message would look like this for  invalid_file_name.ext
+#
+#           Failed to hide invalid file: invalid_file_name.ext
+#
+#     - For a valid file, first check whether there exists a  .secret  directory
+#       inside the file's directory.  If not, create one.  You may find commands
+#       such as  dirname  and  basename  useful here.  Look them up.
+#
+#     - Call  zip  on the file and replace the original one.  Then, relocate the
+#       zipped file into the  .secret  directory.
+#
+#     - For the previous step, if the  passwd  variable was set, call  zip  with
+#       the -P flag and pass in user's password for encryption.
+#
+# After the execution of this part, all valid files included in the command-line
+# arguments should have disappeared from their original locations, but placed in
+# the  .secret  directory of their original locations.
+#
+# Some FAQs:
+#
+#     1.  You mentioned to check whether there are arguments that come after the
+#         option flags?  It's obvious that option flags should not be considered
+#         in this case since they are not file paths anyways.  But how do we get
+#         rid of them so we can look only at those that are actually file paths?
+#
+#         Good question.  When a script is executed, the current shell creates a
+#         a new shell as a child process, and within each new shell, there is an
+#         enviroment variable called $OPTIND, which stores the index of the next
+#         unread argument.
+#
+#         By default, $OPTIND is 1.  As we call  getopts, which iterates through
+#         all command-line arguments until the first one argument that is not an
+#         option to  getopts.
+#
+#         We can use  $OPTIND to calcualte the number of option arguments.  Then
+#         we can pass that number to a command called  shift, which rotates away
+#         the first number of arguments, so that whatever's left will start with
+#         positional parameter $1.
+#
+#     2.  We are prompting the user for password, correct? How do we get it in a
+#         way such that the user's password does not show up on the screen?
+#
+#         Another great question!  read  is a command commonly used to get input
+#         from the user.  And there is a way for  read  to do so silently.  I'll
+#         leave the rest of the explanation to the man page of  read.
+#
+#     3.  The  zip  command gives a lot of annoying output.  I wonder if there's
+#         a way to surpress those and make the user interface more pleasant?
+#
+#         I'm happy that you are showing concern for the user!  Turns out, there
+#         is a way to do that.  Most commands support a quite mode just for this
+#         purpose.  You can look it up in the man page of  zip .
+#
+#     4.  Wait a minute, I thought zip doesn't work on directories?  So what are
+#         we going to do when the file is a directory?
+#
+#         Impressive memory!  I see someone's paying attention in labs and home-
+#         work. :)  So, the command we covered in the lab and homework is  gzip,
+#         which when called recursively, will compress each individual file into
+#         a  .gzip  file.  Here we are using the  zip  command, insead of  gzip,
+#         and  zip does support compressing a directory to one single .zip file.
+#         Read up the man page and figure out how.
+
+# variable for storing the password
+passwd=
+
+i=0
+
+if [ $p_flag -eq 1 ]; then
+    echo  $PASSWD_PROMPT
+    read -s passwd
+
+    while [ ${#} -gt 0 ]; do
+
+	if [ -f $1 ]; then
+	    dir="$(dirname $1)"
+	    mkdir -p $dir/.secret
+	    zip -qP $passwd $1.zip $1
+	    mv $1.zip $dir/.secret
+	    rm $1
+	    
+	elif [ -d $1 ]; then
+	    dir="$(dirname $1)"
+            zip -qrP $passwd $1.zip $1
+            rm -r $1
+	    mkdir -p $dir/.secret
+	    mv $1.zip $dir/.secret
+
+	else 
+	    echo $FILE_ERR $1
+	fi
+
+        i+=
+        shift
+    done
+
+elif [ $u_flag -eq 0 ]; then
+
+    while [ ${#} -gt 0 ]; do
+	
+	if [ -f $1 ]; then
+	    dir="$(dirname $1)"
+            mkdir -p $dir/.secret
+            zip -q $1.zip $1
+            mv $1.zip $dir/.secret
+            rm $1
+
+	elif [ -d $1 ]; then
+	    dir="$(dirname $1)"
+	    zip -qr $1.zip $1
+	    rm -r $1
+	    mkdir -p $dir/.secret
+            mv $1.zip $dir/.secret
+           
+        else
+	    echo $FILE_ERR $1
+	fi
+
+        i+=
+        shift
+    done
+fi
+
+# YOUR CODE EXPECTED FOR THE SECTION ABOVE ------------------[ END OF PART TWO ]
+
+
+# YOUR CODE EXPECTED FOR THIS SECTION-----------[ PART THREE: SECRETS UNVEILED ]
+#
+# This section does the opposite of the previous part of the script.  It unhides
+# all hidden files inside the  .secret  directory within the path in  -u flag's
+# argument, if the  .secret  directory exists.
+#
+# If the -u flag is passed from the command line, the argument immediately after
+# the flag is stored in  $u_path  as done in PART  ONE.  And what you need to do
+# is the following:
+#
+#     - Check whether the  .secret  directory exists in  $u_path, and that it is
+#       a directory - namely, not a regular file. If it's not a valid directory,
+#       print out the  NO_SECRET_ERR  then exit with status 1.
+#
+#       The error message would look like this for  no_secret_directory
+#
+#           No "secret" found at: no_secret_directory
+#
+#     - You may assume that all files inside are the zipped files generated from
+#       PART TWO, and that the  .secret folder is never empty.  Iterate over all
+#       these zipped files, and unzip these files using the command  unzip , and
+#       place the recovered files back to the original path where the files were
+#       hidden. (What is that path?)
+#
+#     - If the zipped file is encrypted by a password, unzip will prompt you for
+#       password. You don't need to worry about implementing the prompt or error
+#       handling.
+#
+#     - If all zipped files are returned to their original locations, remove the
+#       .secret  folder. Otherwise, leave it be.
+#
+# After the execution of this part, if all password are correctly entered, there
+# should be no more  .secret  folder, and all files within should be returned to
+# where they were originally from.
+#-------------------------------------------------------------------------------
+
+if [ $u_flag -eq 1 ]; then
+    u_path=$1
+    
+    if [ -d $u_path/$SECRET_DIR ]; then
+	
+	unzip -q $u_path/$SECRET_DIR/.secret.zip 2> /dev/null
+	if [ $? -eq 0 ]; then
+	    rm $u_path/$SECRET_DIR/.secret.zip
+
+	    
+	else
+	    for stuff in $u_path/$SECRET_DIR/*; do
+		unzip -q $stuff		
+	    done
+	    rm -r $u_path/$SECRET_DIR
+	fi
+	
+    else
+	echo $NO_SECRET_ERR $1
+    fi
+    
+fi
+
+# YOUR CODE EXPECTED FOR THE SECTION ABOVE ----------------[ END OF PART THREE ]
